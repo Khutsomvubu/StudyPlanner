@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StudyFlow — Academic & Personal Planning System</title>
+  
+  <!-- Inter Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN with configuration -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="studyflow_tailwind.config.js"></script>
+
+  <!-- Lucide Icons & Chart.js -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <link rel="stylesheet" href="studyflow_frontend_application.css">
+</head>
+
+<body class="h-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans antialiased transition-colors duration-200">
+  <!-- Toast Container -->
+  <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col space-y-2 pointer-events-none"></div>
+
+  <!-- Custom Confirmation/Action Modal Container -->
+  <div id="modal-container" class="fixed inset-0 z-40 hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-opacity">
+    <div id="modal-card" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 max-w-lg w-full shadow-2xl scale-95 transition-all">
+      <div class="flex items-start justify-between mb-4">
+        <div class="flex items-center gap-3">
+          <div id="modal-icon-wrapper" class="w-10 h-10 rounded-xl bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+            <i data-lucide="info" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 id="modal-title" class="text-lg font-bold text-slate-900 dark:text-white">Modal Title</h3>
+            <p id="modal-subtitle" class="text-xs text-slate-500 dark:text-slate-400">Modal Subtitle</p>
+          </div>
+        </div>
+        <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <div id="modal-body" class="text-sm text-slate-600 dark:text-slate-300 mb-6"></div>
+      <div id="modal-actions" class="flex justify-end gap-2.5">
+        <button id="modal-cancel-btn" onclick="closeModal()" class="px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition">Cancel</button>
+        <button id="modal-confirm-btn" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-sm transition">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Auth Screen View -->
+  <div id="auth-view" class="min-h-full flex items-center justify-center p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-indigo-50/50 via-white to-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950/20">
+    <div class="w-full max-w-md">
+      <!-- Brand Header -->
+      <div class="text-center mb-8">
+        <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-indigo-600 text-white shadow-lg shadow-indigo-500/30 mb-3">
+          <i data-lucide="graduation-cap" class="w-8 h-8"></i>
+        </div>
+        <h1 class="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">StudyFlow</h1>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Student Academic & Personal Planning System</p>
+      </div>
+
+      <!-- Card Form -->
+      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl p-6 sm:p-8">
+        <!-- Auth Tabs -->
+        <div class="flex border-b border-slate-200 dark:border-slate-800 mb-6">
+          <button id="tab-login" onclick="switchAuthTab('login')" class="flex-1 pb-3 text-sm font-semibold border-b-2 border-indigo-600 text-indigo-600 dark:text-indigo-400">Log In</button>
+          <button id="tab-signup" onclick="switchAuthTab('signup')" class="flex-1 pb-3 text-sm font-medium text-slate-500 hover:text-slate-700 dark:text-slate-400 border-b-2 border-transparent">Sign Up</button>
+        </div>
+
+        <!-- Login Form -->
+        <form id="form-login" onsubmit="handleLogin(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Email Address</label>
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                <i data-lucide="mail" class="w-4 h-4"></i>
+              </span>
+              <input type="email" id="login-email" required value="khutso@university.ac.za" class="w-full pl-9 pr-3 py-2.5 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="student@university.ac.za">
+            </div>
+          </div>
+          <div>
+            <div class="flex justify-between items-center mb-1.5">
+              <label class="text-xs font-semibold text-slate-700 dark:text-slate-300">Password</label>
+              <button type="button" onclick="handleForgotPassword()" class="text-xs text-indigo-600 dark:text-indigo-400 hover:underline">Forgot password?</button>
+            </div>
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                <i data-lucide="lock" class="w-4 h-4"></i>
+              </span>
+              <input type="password" id="login-password" required value="password123" class="w-full pl-9 pr-3 py-2.5 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="••••••••">
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between text-xs text-slate-600 dark:text-slate-400">
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" id="login-remember" checked class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500">
+              <span>Remember me</span>
+            </label>
+          </div>
+
+          <button type="submit" class="w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm rounded-xl shadow-md shadow-indigo-600/20 transition flex items-center justify-center gap-2">
+            <span>Log In to StudyFlow</span>
+            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          </button>
+
+          <!-- Quick Demo Student Login Shortcut -->
+          <div class="pt-3 border-t border-slate-100 dark:border-slate-800 text-center">
+            <button type="button" onclick="loginDemoUser()" class="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 bg-emerald-50 dark:bg-emerald-950/40 px-3 py-1.5 rounded-lg border border-emerald-200 dark:border-emerald-800 transition">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+              <span>One-Click Login as Khutso (Demo Student)</span>
+            </button>
+          </div>
+        </form>
+
+        <!-- Sign Up Form -->
+        <form id="form-signup" onsubmit="handleSignup(event)" class="space-y-3.5 hidden">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Full Name</label>
+            <input type="text" id="signup-name" required placeholder="e.g. Khutso Modise" class="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Email Address</label>
+            <input type="email" id="signup-email" required placeholder="name@university.ac.za" class="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+          </div>
+          <div class="grid grid-cols-2 gap-2.5">
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Password</label>
+              <input type="password" id="signup-password" required minlength="8" autocomplete="new-password" placeholder="8+ characters with upper, lower, digit & symbol" title="Use at least 8 characters, including an uppercase letter, lowercase letter, digit, and special character." class="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Confirm</label>
+              <input type="password" id="signup-confirm" required minlength="8" autocomplete="new-password" placeholder="Repeat your password" class="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Institution / University</label>
+            <input type="text" id="signup-uni" required placeholder="e.g. Tshwane University of Technology" class="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+          </div>
+          <div class="grid grid-cols-3 gap-2">
+            <div class="col-span-2">
+              <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Course / Programme</label>
+              <input type="text" id="signup-course" required placeholder="Diploma in Multimedia Computing" class="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Year</label>
+              <select id="signup-year" class="w-full px-2 py-2 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                <option value="1st Year">1st Year</option>
+                <option value="2nd Year" selected>2nd Year</option>
+                <option value="3rd Year">3rd Year</option>
+                <option value="4th Year">4th Year</option>
+                <option value="Postgraduate">Postgrad</option>
+              </select>
+            </div>
+          </div>
+          <button type="submit" class="w-full mt-2 py-2.5 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm rounded-xl shadow-md shadow-indigo-600/20 transition">
+            Create Free Student Account
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Application Wrapper -->
+  <div id="app-view" class="hidden min-h-full flex flex-col md:flex-row pb-20 md:pb-0">
+    
+    <!-- Desktop Sidebar Navigation -->
+    <aside class="hidden md:flex flex-col w-64 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shrink-0 h-screen sticky top-0">
+      <!-- App Brand -->
+      <div class="p-5 flex items-center justify-between border-b border-slate-100 dark:border-slate-800">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-md shadow-indigo-600/30">
+            <i data-lucide="graduation-cap" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <span class="font-bold text-base tracking-tight text-slate-900 dark:text-white">StudyFlow</span>
+            <span class="block text-[10px] uppercase font-bold tracking-wider text-indigo-600 dark:text-indigo-400">Student OS</span>
+          </div>
+        </div>
+        <button onclick="toggleDarkMode()" class="p-2 rounded-xl text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition" title="Toggle theme">
+          <i data-lucide="moon" class="w-4 h-4 hidden dark:block"></i>
+          <i data-lucide="sun" class="w-4 h-4 block dark:hidden"></i>
+        </button>
+      </div>
+
+      <!-- Navigation Links -->
+      <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+        <button onclick="navigate('dashboard')" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/50" data-page="dashboard">
+          <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+          <span>Dashboard</span>
+        </button>
+        <button onclick="navigate('modules')" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" data-page="modules">
+          <i data-lucide="book-open" class="w-4 h-4"></i>
+          <span>My Modules</span>
+        </button>
+        <button onclick="navigate('assessments')" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" data-page="assessments">
+          <i data-lucide="calendar-clock" class="w-4 h-4"></i>
+          <span>Assessments</span>
+          <span id="badge-assessments-count" class="ml-auto text-xs px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 font-semibold">3</span>
+        </button>
+        <button onclick="navigate('timetable')" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" data-page="timetable">
+          <i data-lucide="calendar-days" class="w-4 h-4"></i>
+          <span>Timetable</span>
+        </button>
+        <button onclick="navigate('studyplan')" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" data-page="studyplan">
+          <i data-lucide="brain" class="w-4 h-4"></i>
+          <span>Study Plan</span>
+        </button>
+        <button onclick="navigate('daily')" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" data-page="daily">
+          <i data-lucide="check-square" class="w-4 h-4"></i>
+          <span>Daily Planner</span>
+        </button>
+        <button onclick="navigate('sleep')" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" data-page="sleep">
+          <i data-lucide="bed" class="w-4 h-4"></i>
+          <span>Sleep & Wellness</span>
+        </button>
+        <button onclick="navigate('analytics')" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" data-page="analytics">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          <span>Progress Tracking</span>
+        </button>
+        <button onclick="navigate('settings')" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" data-page="settings">
+          <i data-lucide="settings" class="w-4 h-4"></i>
+          <span>Settings</span>
+        </button>
+      </nav>
+
+      <!-- User Mini Profile Footer -->
+      <div class="p-3 border-t border-slate-100 dark:border-slate-800">
+        <div class="flex items-center gap-3 p-2 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+          <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-indigo-600 to-sky-400 text-white flex items-center justify-center font-bold text-sm" id="user-avatar-initials">
+            KM
+          </div>
+          <div class="flex-1 min-w-0">
+            <p id="user-sidebar-name" class="text-xs font-bold text-slate-900 dark:text-white truncate">Khutso Modise</p>
+            <p id="user-sidebar-course" class="text-[11px] text-slate-500 dark:text-slate-400 truncate">Multimedia Computing</p>
+          </div>
+          <button onclick="handleLogout()" class="text-slate-400 hover:text-rose-500 p-1 rounded-lg transition" title="Log out">
+            <i data-lucide="log-out" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Mobile Top Header -->
+    <header class="md:hidden flex items-center justify-between p-4 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-30">
+      <div class="flex items-center gap-2">
+        <div class="w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center">
+          <i data-lucide="graduation-cap" class="w-5 h-5"></i>
+        </div>
+        <span class="font-bold text-base tracking-tight">StudyFlow</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <button onclick="toggleDarkMode()" class="p-2 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800">
+          <i data-lucide="moon" class="w-4 h-4 hidden dark:block"></i>
+          <i data-lucide="sun" class="w-4 h-4 block dark:hidden"></i>
+        </button>
+        <button onclick="handleLogout()" class="p-2 rounded-lg text-slate-500 hover:text-rose-500">
+          <i data-lucide="log-out" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 px-2 py-1.5 flex justify-around items-center">
+      <button onclick="navigate('dashboard')" class="mobile-nav-btn p-2 flex flex-col items-center gap-0.5 text-indigo-600 dark:text-indigo-400" data-page="dashboard">
+        <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+        <span class="text-[10px] font-medium">Home</span>
+      </button>
+      <button onclick="navigate('modules')" class="mobile-nav-btn p-2 flex flex-col items-center gap-0.5 text-slate-500 dark:text-slate-400" data-page="modules">
+        <i data-lucide="book-open" class="w-5 h-5"></i>
+        <span class="text-[10px] font-medium">Modules</span>
+      </button>
+      <button onclick="navigate('assessments')" class="mobile-nav-btn p-2 flex flex-col items-center gap-0.5 text-slate-500 dark:text-slate-400" data-page="assessments">
+        <i data-lucide="calendar-clock" class="w-5 h-5"></i>
+        <span class="text-[10px] font-medium">Deadlines</span>
+      </button>
+      <button onclick="navigate('timetable')" class="mobile-nav-btn p-2 flex flex-col items-center gap-0.5 text-slate-500 dark:text-slate-400" data-page="timetable">
+        <i data-lucide="calendar-days" class="w-5 h-5"></i>
+        <span class="text-[10px] font-medium">Schedule</span>
+      </button>
+      <button onclick="navigate('daily')" class="mobile-nav-btn p-2 flex flex-col items-center gap-0.5 text-slate-500 dark:text-slate-400" data-page="daily">
+        <i data-lucide="check-square" class="w-5 h-5"></i>
+        <span class="text-[10px] font-medium">Daily</span>
+      </button>
+      <button onclick="navigate('studyplan')" class="mobile-nav-btn p-2 flex flex-col items-center gap-0.5 text-slate-500 dark:text-slate-400" data-page="studyplan">
+        <i data-lucide="brain" class="w-5 h-5"></i>
+        <span class="text-[10px] font-medium">Plan</span>
+      </button>
+      <button onclick="navigate('settings')" class="mobile-nav-btn p-2 flex flex-col items-center gap-0.5 text-slate-500 dark:text-slate-400" data-page="settings">
+        <i data-lucide="settings" class="w-5 h-5"></i>
+        <span class="text-[10px] font-medium">More</span>
+      </button>
+    </nav>
+
+    <!-- Main Content Canvas -->
+    <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full">
+
+      <!-- PAGE: DASHBOARD -->
+      <section id="page-dashboard" class="page-container space-y-6">
+        <!-- Header Banner with greeting -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-gradient-to-r from-indigo-600 via-indigo-700 to-purple-700 rounded-3xl p-6 sm:p-8 text-white shadow-xl shadow-indigo-600/10">
+          <div>
+            <div class="flex items-center gap-2 text-indigo-200 text-xs font-medium uppercase tracking-wider mb-1">
+              <i data-lucide="calendar" class="w-3.5 h-3.5"></i>
+              <span id="dash-date-str">Thursday, 10 September 2026</span>
+            </div>
+            <h2 id="dash-greeting" class="text-2xl sm:text-3xl font-extrabold tracking-tight">Good morning, Khutso 👋</h2>
+            <p class="text-indigo-100 text-sm mt-1">Here is your academic overview and priorities for today.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="navigate('studyplan')" class="px-4 py-2.5 bg-white/10 hover:bg-white/20 backdrop-blur text-white text-xs font-semibold rounded-xl transition border border-white/20 flex items-center gap-2">
+              <i data-lucide="wand-2" class="w-4 h-4"></i>
+              <span>Generate Study Plan</span>
+            </button>
+            <button onclick="navigate('daily')" class="px-4 py-2.5 bg-white text-indigo-700 hover:bg-indigo-50 text-xs font-bold rounded-xl transition shadow-md flex items-center gap-2">
+              <i data-lucide="plus" class="w-4 h-4"></i>
+              <span>Add Task</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Metric Stat Cards -->
+        <div class="grid grid-cols-2 lg:grid-cols-5 gap-3.5 sm:gap-4">
+          <!-- Stat 1: Academic Average -->
+          <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-5 shadow-sm">
+            <div class="flex items-center justify-between text-slate-400 mb-2">
+              <span class="text-xs font-semibold uppercase tracking-wider">Average Mark</span>
+              <div class="p-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400">
+                <i data-lucide="award" class="w-4 h-4"></i>
+              </div>
+            </div>
+            <div class="flex items-baseline gap-2">
+              <span id="dash-stat-average" class="text-2xl font-bold text-slate-900 dark:text-white">72%</span>
+              <span class="text-[11px] font-medium text-emerald-600 dark:text-emerald-400">Target: 75%</span>
+            </div>
+          </div>
+
+          <!-- Stat 2: Active Modules -->
+          <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-5 shadow-sm">
+            <div class="flex items-center justify-between text-slate-400 mb-2">
+              <span class="text-xs font-semibold uppercase tracking-wider">Active Modules</span>
+              <div class="p-1.5 rounded-lg bg-sky-50 dark:bg-sky-950 text-sky-600 dark:text-sky-400">
+                <i data-lucide="book-open" class="w-4 h-4"></i>
+              </div>
+            </div>
+            <div class="flex items-baseline gap-2">
+              <span id="dash-stat-modules" class="text-2xl font-bold text-slate-900 dark:text-white">4</span>
+              <span class="text-[11px] font-medium text-slate-500">Registered</span>
+            </div>
+          </div>
+
+          <!-- Stat 3: Upcoming Assessments -->
+          <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-5 shadow-sm">
+            <div class="flex items-center justify-between text-slate-400 mb-2">
+              <span class="text-xs font-semibold uppercase tracking-wider">Deadlines</span>
+              <div class="p-1.5 rounded-lg bg-rose-50 dark:bg-rose-950 text-rose-600 dark:text-rose-400">
+                <i data-lucide="alert-circle" class="w-4 h-4"></i>
+              </div>
+            </div>
+            <div class="flex items-baseline gap-2">
+              <span id="dash-stat-deadlines" class="text-2xl font-bold text-slate-900 dark:text-white">3</span>
+              <span class="text-[11px] font-medium text-rose-600 dark:text-rose-400">Upcoming</span>
+            </div>
+          </div>
+
+          <!-- Stat 4: Today's Task Progress -->
+          <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-5 shadow-sm">
+            <div class="flex items-center justify-between text-slate-400 mb-2">
+              <span class="text-xs font-semibold uppercase tracking-wider">Daily Progress</span>
+              <div class="p-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400">
+                <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+              </div>
+            </div>
+            <div class="flex items-baseline gap-2">
+              <span id="dash-stat-daily" class="text-2xl font-bold text-slate-900 dark:text-white">65%</span>
+              <span id="dash-stat-daily-count" class="text-[11px] font-medium text-slate-500">2 of 4</span>
+            </div>
+          </div>
+
+          <!-- Stat 5: Sleep Duration -->
+          <div class="col-span-2 lg:col-span-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 sm:p-5 shadow-sm">
+            <div class="flex items-center justify-between text-slate-400 mb-2">
+              <span class="text-xs font-semibold uppercase tracking-wider">Sleep Last Night</span>
+              <div class="p-1.5 rounded-lg bg-purple-50 dark:purple-950 text-purple-600 dark:text-purple-400">
+                <i data-lucide="moon" class="w-4 h-4"></i>
+              </div>
+            </div>
+            <div class="flex items-baseline gap-2">
+              <span id="dash-stat-sleep" class="text-2xl font-bold text-slate-900 dark:text-white">7h 30m</span>
+              <span class="text-[11px] font-medium text-emerald-600 dark:text-emerald-400">Optimal</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Smart Study Recommendation Card -->
+        <div id="dash-recommendation-card" class="bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border border-amber-300 dark:border-amber-700/50 rounded-2xl p-4.5 flex items-start gap-3.5">
+          <div class="p-2 bg-amber-500 text-white rounded-xl shadow-sm shrink-0">
+            <i data-lucide="lightbulb" class="w-5 h-5"></i>
+          </div>
+          <div class="flex-1 min-w-0">
+            <h4 class="text-xs font-bold uppercase tracking-wider text-amber-800 dark:text-amber-400">Study Flow Recommendation</h4>
+            <p id="dash-recommendation-text" class="text-sm font-medium text-slate-800 dark:text-slate-200 mt-0.5">
+              Spend more study time on Computational Mathematics this week because your current mark (61%) is 14% below your target (75%).
+            </p>
+          </div>
+          <button onclick="generatePlanForLowestModule()" class="hidden sm:inline-flex text-xs font-semibold px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white rounded-lg transition shrink-0">
+            Plan Session
+          </button>
+        </div>
+
+        <!-- 2 Column Split: Today's Schedule & Upcoming Deadlines -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <!-- Column Left (7 cols): Today's Schedule -->
+          <div class="lg:col-span-7 space-y-4">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <i data-lucide="clock" class="w-5 h-5 text-indigo-600 dark:text-indigo-400"></i>
+                <h3 class="text-base font-bold text-slate-900 dark:text-white">Today's Schedule</h3>
+              </div>
+              <span id="dash-schedule-day-tag" class="text-xs px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-full font-medium">Thursday</span>
+            </div>
+
+            <!-- Schedule List Items Container -->
+            <div id="dash-schedule-list" class="space-y-2.5">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+
+          <!-- Column Right (5 cols): Upcoming Deadlines & Module Progress -->
+          <div class="lg:col-span-5 space-y-6">
+            <!-- Upcoming Deadlines -->
+            <div class="space-y-3">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <i data-lucide="calendar-alert" class="w-5 h-5 text-rose-500"></i>
+                  <h3 class="text-base font-bold text-slate-900 dark:text-white">Next Deadlines</h3>
+                </div>
+                <button onclick="navigate('assessments')" class="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline">View All</button>
+              </div>
+              <div id="dash-deadlines-list" class="space-y-2.5">
+                <!-- Rendered via JS -->
+              </div>
+            </div>
+
+            <!-- Academic Progress Bars -->
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 space-y-4">
+              <div class="flex items-center justify-between">
+                <h4 class="text-sm font-bold text-slate-900 dark:text-white">Academic Progress</h4>
+                <button onclick="navigate('modules')" class="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline">Manage</button>
+              </div>
+              <div id="dash-modules-progress" class="space-y-3.5">
+                <!-- Rendered via JS -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PAGE: MY MODULES -->
+      <section id="page-modules" class="page-container space-y-6 hidden">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">My Modules</h2>
+            <p class="text-sm text-slate-500 dark:text-slate-400">Track semester coursework, current marks, and targets.</p>
+          </div>
+          <button onclick="openModuleModal()" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm rounded-xl shadow-sm transition flex items-center gap-2 self-start">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            <span>Add Module</span>
+          </button>
+        </div>
+
+        <!-- Modules Grid -->
+        <div id="modules-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
+          <!-- Rendered via JS -->
+        </div>
+      </section>
+
+      <!-- PAGE: ASSESSMENTS -->
+      <section id="page-assessments" class="page-container space-y-6 hidden">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Assessments & Deadlines</h2>
+            <p class="text-sm text-slate-500 dark:text-slate-400">Assignments, tests, practicals, projects, and exams.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <!-- Filter Dropdown -->
+            <select id="assessment-filter-status" onchange="renderAssessments()" class="px-3 py-2 text-xs font-medium bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none">
+              <option value="ALL">All Statuses</option>
+              <option value="Not started">Not Started</option>
+              <option value="In progress">In Progress</option>
+              <option value="Completed">Completed</option>
+            </select>
+            <button onclick="openAssessmentModal()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs rounded-xl shadow-sm transition flex items-center gap-1.5">
+              <i data-lucide="plus" class="w-4 h-4"></i>
+              <span>Add Assessment</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Assessment Cards List -->
+        <div id="assessments-list" class="space-y-3">
+          <!-- Rendered via JS -->
+        </div>
+      </section>
+
+      <!-- PAGE: TIMETABLE -->
+      <section id="page-timetable" class="page-container space-y-6 hidden">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Weekly Timetable</h2>
+            <p class="text-sm text-slate-500 dark:text-slate-400">Lectures, lab practicals, tutorials, and class locations.</p>
+          </div>
+          <button onclick="openTimetableModal()" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm rounded-xl shadow-sm transition flex items-center gap-2 self-start">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            <span>Add Class / Lecture</span>
+          </button>
+        </div>
+
+        <!-- Weekly Day Selector Tabs -->
+        <div class="flex overflow-x-auto pb-1 gap-1 border-b border-slate-200 dark:border-slate-800" id="timetable-day-tabs">
+          <!-- Rendered via JS for Mon-Sun -->
+        </div>
+
+        <!-- Timetable Day Content View -->
+        <div id="timetable-day-content" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 min-h-[300px]">
+          <!-- Rendered via JS -->
+        </div>
+      </section>
+
+      <!-- PAGE: STUDY PLAN -->
+      <section id="page-studyplan" class="page-container space-y-6 hidden">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Study Plan Generator</h2>
+            <p class="text-sm text-slate-500 dark:text-slate-400">Algorithmically prioritizes modules based on urgency, marks vs target, and difficulty.</p>
+          </div>
+          <button onclick="generateAutomaticStudyPlan()" class="px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold text-sm rounded-xl shadow-md shadow-indigo-600/20 transition flex items-center gap-2 self-start">
+            <i data-lucide="sparkles" class="w-4 h-4"></i>
+            <span>Generate Smart Plan</span>
+          </button>
+        </div>
+
+        <!-- Generator Configuration Box -->
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm space-y-4">
+          <h3 class="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+            <i data-lucide="sliders" class="w-4 h-4 text-indigo-600"></i>
+            <span>Generator Settings</span>
+          </h3>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
+            <div>
+              <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1.5">Horizon / Days</label>
+              <select id="gen-days-range" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none">
+                <option value="3">Next 3 Days</option>
+                <option value="5">Next 5 Days</option>
+                <option value="7" selected>Full Week (7 Days)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1.5">Available Hours / Day</label>
+              <select id="gen-hours-day" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none">
+                <option value="1.5">1.5 Hours / Day</option>
+                <option value="2.5" selected>2.5 Hours / Day</option>
+                <option value="4">4.0 Hours / Day</option>
+              </select>
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1.5">Preferred Study Time</label>
+              <select id="gen-preferred-time" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none">
+                <option value="Morning">Morning (08:00 - 12:00)</option>
+                <option value="Afternoon">Afternoon (13:00 - 17:00)</option>
+                <option value="Evening" selected>Evening (18:00 - 22:00)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-600 dark:text-slate-400 mb-1.5">Session Block Duration</label>
+              <select id="gen-session-duration" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none">
+                <option value="45">45 minutes (Pomodoro Block)</option>
+                <option value="60" selected>60 minutes (Standard)</option>
+                <option value="90">90 minutes (Deep Focus)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Generated Study Sessions List -->
+        <div class="space-y-4">
+          <div class="flex items-center justify-between">
+            <h3 class="text-base font-bold text-slate-900 dark:text-white">Scheduled Study Sessions</h3>
+            <span id="study-sessions-count" class="text-xs text-slate-500">4 sessions scheduled</span>
+          </div>
+          <div id="study-sessions-list" class="space-y-3">
+            <!-- Rendered via JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- PAGE: DAILY PLANNER -->
+      <section id="page-daily" class="page-container space-y-6 hidden">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Daily Planner</h2>
+            <p class="text-sm text-slate-500 dark:text-slate-400">Organize your daily study goals, assignment tasks, and errands.</p>
+          </div>
+          <button onclick="openTaskModal()" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm rounded-xl shadow-sm transition flex items-center gap-2 self-start">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            <span>Add Daily Task</span>
+          </button>
+        </div>
+
+        <!-- Daily Progress Bar Card -->
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
+          <div class="flex items-center justify-between mb-2">
+            <div>
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Today's Completion Rate</span>
+              <h3 id="planner-progress-text" class="text-xl font-extrabold text-slate-900 dark:text-white mt-0.5">70%</h3>
+            </div>
+            <span id="planner-tasks-ratio" class="text-xs font-semibold px-2.5 py-1 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 rounded-lg">3 of 4 Completed</span>
+          </div>
+          <div class="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-3 overflow-hidden">
+            <div id="planner-progress-bar" class="bg-indigo-600 h-3 rounded-full transition-all duration-500" style="width: 70%"></div>
+          </div>
+        </div>
+
+        <!-- Task Items -->
+        <div class="space-y-2.5">
+          <h3 class="text-sm font-bold text-slate-900 dark:text-white">Tasks for Today</h3>
+          <div id="daily-tasks-list" class="space-y-2">
+            <!-- Rendered via JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- PAGE: SLEEP & WELLNESS -->
+      <section id="page-sleep" class="page-container space-y-6 hidden">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Sleep & Wellness Schedule</h2>
+            <p class="text-sm text-slate-500 dark:text-slate-400">A planning aid to protect cognitive recovery and study readiness.</p>
+          </div>
+          <button onclick="openSleepLogModal()" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm rounded-xl shadow-sm transition flex items-center gap-2 self-start">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            <span>Log Sleep</span>
+          </button>
+        </div>
+
+        <!-- Sleep Target Plan Banner -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
+            <div class="flex items-center gap-2 text-slate-400 text-xs font-semibold uppercase mb-1">
+              <i data-lucide="alarm-clock" class="w-4 h-4 text-sky-500"></i>
+              <span>Target Wake-up</span>
+            </div>
+            <p id="sleep-card-wake" class="text-2xl font-bold text-slate-900 dark:text-white">06:30</p>
+            <p class="text-xs text-slate-500 mt-1">Class readiness routine</p>
+          </div>
+
+          <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
+            <div class="flex items-center gap-2 text-slate-400 text-xs font-semibold uppercase mb-1">
+              <i data-lucide="moon" class="w-4 h-4 text-purple-500"></i>
+              <span>Recommended Bedtime</span>
+            </div>
+            <p id="sleep-card-bedtime" class="text-2xl font-bold text-slate-900 dark:text-white">22:30</p>
+            <p class="text-xs text-slate-500 mt-1">Based on 8h target</p>
+          </div>
+
+          <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
+            <div class="flex items-center gap-2 text-slate-400 text-xs font-semibold uppercase mb-1">
+              <i data-lucide="battery-charging" class="w-4 h-4 text-emerald-500"></i>
+              <span>Sleep Consistency</span>
+            </div>
+            <p id="sleep-card-consistency" class="text-2xl font-bold text-emerald-600 dark:text-emerald-400">78%</p>
+            <p class="text-xs text-slate-500 mt-1">Weekly alignment score</p>
+          </div>
+        </div>
+
+        <!-- Sleep Gentle Recommendation -->
+        <div id="sleep-gentle-banner" class="bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800 rounded-2xl p-4.5 flex items-start gap-3.5">
+          <div class="p-2 bg-indigo-600 text-white rounded-xl shadow-sm shrink-0">
+            <i data-lucide="sparkles" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h4 class="text-xs font-bold uppercase tracking-wider text-indigo-800 dark:text-indigo-400">Wellness Recommendation</h4>
+            <p id="sleep-recommendation-text" class="text-sm font-medium text-slate-700 dark:text-slate-300 mt-0.5">
+              💡 Your average sleep this week is 7h 32m (target: 8h). Consider shifting evening study sessions 30 minutes earlier to preserve REM sleep cycles.
+            </p>
+            <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-1">Note: This wellness aid is for personal academic routine planning, not medical advice.</p>
+          </div>
+        </div>
+
+        <!-- Sleep Logs History Table -->
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
+          <h3 class="text-base font-bold text-slate-900 dark:text-white mb-4">Weekly Sleep Log</h3>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs text-slate-600 dark:text-slate-300">
+              <thead class="border-b border-slate-100 dark:border-slate-800 text-slate-400 uppercase text-[10px] font-bold tracking-wider">
+                <tr>
+                  <th class="py-2.5">Date</th>
+                  <th class="py-2.5">Bedtime</th>
+                  <th class="py-2.5">Wake Time</th>
+                  <th class="py-2.5">Duration</th>
+                  <th class="py-2.5">Status</th>
+                  <th class="py-2.5 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="sleep-records-tbody" class="divide-y divide-slate-100 dark:divide-slate-800">
+                <!-- Rendered via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- PAGE: PROGRESS TRACKING -->
+      <section id="page-analytics" class="page-container space-y-6 hidden">
+        <div>
+          <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Academic Analytics & Progress</h2>
+          <p class="text-sm text-slate-500 dark:text-slate-400">Visual performance charts, study hours distribution, and task completion.</p>
+        </div>
+
+        <!-- 3 Charts Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Chart 1: Module Performance -->
+          <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-sm font-bold text-slate-900 dark:text-white">Module Performance (Mark vs Target %)</h3>
+              <span class="text-xs text-slate-400">Semester View</span>
+            </div>
+            <div class="relative h-64 w-full">
+              <canvas id="chart-module-marks"></canvas>
+            </div>
+          </div>
+
+          <!-- Chart 2: Study Hours per day -->
+          <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-sm font-bold text-slate-900 dark:text-white">Study Hours This Week</h3>
+              <span id="analytics-study-hours-total" class="text-xs text-indigo-600 font-semibold">Total: 0 hrs</span>
+            </div>
+            <div class="relative h-64 w-full">
+              <canvas id="chart-study-hours"></canvas>
+            </div>
+          </div>
+
+          <!-- Chart 3: Task Completion Ratio -->
+          <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-sm font-bold text-slate-900 dark:text-white">Task Completion Ratio</h3>
+              <span class="text-xs text-emerald-600 font-semibold">Active Cycle</span>
+            </div>
+            <div class="relative h-64 w-full flex items-center justify-center">
+              <canvas id="chart-tasks-ratio"></canvas>
+            </div>
+          </div>
+
+          <!-- Quick Summary Analytics Card -->
+          <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm space-y-4">
+            <h3 class="text-sm font-bold text-slate-900 dark:text-white">Key Academic Metrics</h3>
+            <div class="space-y-3 text-xs">
+              <div class="flex justify-between py-2 border-b border-slate-100 dark:border-slate-800">
+                <span class="text-slate-500">Overall Average:</span>
+                <span id="analytics-avg-mark" class="font-bold text-slate-900 dark:text-white">72%</span>
+              </div>
+              <div class="flex justify-between py-2 border-b border-slate-100 dark:border-slate-800">
+                <span class="text-slate-500">Hardest Module Identified:</span>
+                <span id="analytics-hardest-module" class="font-bold text-rose-500 text-right">No modules selected</span>
+              </div>
+              <div class="flex justify-between py-2 border-b border-slate-100 dark:border-slate-800">
+                <span class="text-slate-500">Completed Study Sessions:</span>
+                <span id="analytics-completed-sessions" class="font-bold text-slate-900 dark:text-white">0 sessions</span>
+              </div>
+              <div class="flex justify-between py-2">
+                <span class="text-slate-500">Active Deadlines Remaining:</span>
+                <span id="analytics-deadlines-left" class="font-bold text-amber-500">3 assessments</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PAGE: SETTINGS -->
+      <section id="page-settings" class="page-container space-y-6 hidden">
+        <div>
+          <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Settings & Profile</h2>
+          <p class="text-sm text-slate-500 dark:text-slate-400">Personalize your academic details, study routines, and app preferences.</p>
+        </div>
+
+        <form id="form-settings" onsubmit="saveSettings(event)" class="space-y-6">
+          <!-- Student Profile Card -->
+          <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 space-y-4 shadow-sm">
+            <h3 class="text-base font-bold text-slate-900 dark:text-white">Personal Information</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+              <div>
+                <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Full Name</label>
+                <input type="text" id="set-name" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              </div>
+              <div>
+                <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Email</label>
+                <input type="email" id="set-email" disabled class="w-full px-3 py-2 bg-slate-100 dark:bg-slate-800/40 text-slate-400 border border-slate-200 dark:border-slate-700 rounded-xl cursor-not-allowed">
+              </div>
+              <div>
+                <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">University / Institution</label>
+                <input type="text" id="set-uni" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              </div>
+              <div>
+                <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Course / Programme</label>
+                <input type="text" id="set-course" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              </div>
+            </div>
+          </div>
+
+          <!-- Academic Routine & Study Defaults -->
+          <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 space-y-4 shadow-sm">
+            <h3 class="text-base font-bold text-slate-900 dark:text-white">Planning & Wellness Defaults</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+              <div>
+                <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Target Sleep Duration</label>
+                <select id="set-sleep-hours" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none">
+                  <option value="7">7 Hours</option>
+                  <option value="7.5">7.5 Hours</option>
+                  <option value="8" selected>8 Hours</option>
+                  <option value="8.5">8.5 Hours</option>
+                </select>
+              </div>
+              <div>
+                <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Target Wake-up Time</label>
+                <input type="time" id="set-wake-time" value="06:30" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none">
+              </div>
+              <div>
+                <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Default Study Block</label>
+                <select id="set-study-block" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none">
+                  <option value="45">45 min</option>
+                  <option value="60" selected>60 min</option>
+                  <option value="90">90 min</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Demo Data Management & Actions -->
+          <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 space-y-4 shadow-sm">
+            <h3 class="text-base font-bold text-slate-900 dark:text-white">Data Management & Presets</h3>
+            <p class="text-xs text-slate-500">Quickly reset data or reload Khutso's complete realistic demo profile.</p>
+            
+            <div class="flex flex-wrap items-center gap-3">
+              <button type="button" onclick="loadSampleKhutsoData()" class="px-3.5 py-2 bg-emerald-50 dark:bg-emerald-950/50 hover:bg-emerald-100 text-emerald-700 dark:text-emerald-400 font-semibold text-xs rounded-xl border border-emerald-300 dark:border-emerald-800 transition flex items-center gap-2">
+                <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                <span>Reload Khutso Demo Data</span>
+              </button>
+              <button type="button" onclick="confirmClearUserData()" class="px-3.5 py-2 bg-rose-50 dark:bg-rose-950/50 hover:bg-rose-100 text-rose-700 dark:text-rose-400 font-semibold text-xs rounded-xl border border-rose-300 dark:border-rose-800 transition flex items-center gap-2">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                <span>Reset / Clear All Records</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="flex justify-end">
+            <button type="submit" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm rounded-xl shadow-md transition flex items-center gap-2">
+              <i data-lucide="save" class="w-4 h-4"></i>
+              <span>Save Preferences</span>
+            </button>
+          </div>
+        </form>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="studyflow_frontend_application.js"></script>
+</body>
+</html>
