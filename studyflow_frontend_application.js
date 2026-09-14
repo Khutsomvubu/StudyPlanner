@@ -40,65 +40,6 @@
     let assessmentReminderTimer = null;
     let taskReminderTimer = null;
 
-    /* =========================================================================
-       DEMO STUDENT PROFILE (KHUTSO MODISE)
-       ========================================================================= */
-    const DEFAULT_USER_PROFILE = {
-      id: 'khutso-modise',
-      name: 'Khutso Modise',
-      email: 'khutso@university.ac.za',
-      university: 'Tshwane University of Technology',
-      course: 'Diploma in Multimedia Computing',
-      year_of_study: '2nd Year',
-      target_sleep: 8,
-      wake_time: '06:30',
-      preferred_study_time: 'Evening',
-      default_study_block: 60
-    };
-
-    const DEFAULT_MODULES = [
-      {
-        id: 'mod-1',
-        name: 'Programming A',
-        code: 'PPAF05D',
-        lecturer: 'Dr. Van Der Merwe',
-        current_mark: 68,
-        target_mark: 75,
-        difficulty: 'Hard',
-        notes: 'Covers Object-Oriented Programming and Data Structures.'
-      },
-      {
-        id: 'mod-2',
-        name: 'Computational Mathematics',
-        code: 'CMAT02A',
-        lecturer: 'Prof. Mokoena',
-        current_mark: 61,
-        target_mark: 75,
-        difficulty: 'Hard',
-        notes: 'Discrete mathematics, linear algebra, boolean logic.'
-      },
-      {
-        id: 'mod-3',
-        name: 'Computer Fundamentals',
-        code: 'CFUN01B',
-        lecturer: 'Mr. Nkosi',
-        current_mark: 78,
-        target_mark: 80,
-        difficulty: 'Medium',
-        notes: 'Computer hardware architecture, logic gates, operating systems.'
-      },
-      {
-        id: 'mod-4',
-        name: 'Communication for Academic Purposes',
-        code: 'CAPF01D',
-        lecturer: 'Ms. Smith',
-        current_mark: 82,
-        target_mark: 85,
-        difficulty: 'Easy',
-        notes: 'Technical reporting, academic writing and presentation skills.'
-      }
-    ];
-
     function getTodayDateString() {
       const d = new Date();
       return d.toISOString().split('T')[0];
@@ -124,77 +65,8 @@
       return date.toLocaleDateString('en-US', { weekday: 'long' });
     }
 
-    const DEFAULT_ASSESSMENTS = [
-      {
-        id: 'ass-1',
-        module_id: 'mod-1',
-        name: 'Programming Assignment 2 (Data Structures)',
-        type: 'Assignment',
-        due_date: getOffsetDateString(2),
-        due_time: '23:59',
-        weight: 15,
-        description: 'Binary search tree and linked list implementation.',
-        status: 'In progress'
-      },
-      {
-        id: 'ass-2',
-        module_id: 'mod-2',
-        name: 'Computational Mathematics Semester Test',
-        type: 'Test',
-        due_date: getOffsetDateString(5),
-        due_time: '09:00',
-        weight: 25,
-        description: 'Matrix algebra, truth tables, boolean minimization.',
-        status: 'Not started'
-      },
-      {
-        id: 'ass-3',
-        module_id: 'mod-3',
-        name: 'Computer Fundamentals Practical Project',
-        type: 'Project',
-        due_date: getOffsetDateString(9),
-        due_time: '17:00',
-        weight: 20,
-        description: 'Assembly simulated pipeline instructions.',
-        status: 'Not started'
-      }
-    ];
-
-    const DEFAULT_TIMETABLE = [
-      { id: 'tt-1', module_id: 'mod-1', day: 'Monday', start_time: '08:00', end_time: '10:00', location: 'Lab 3B' },
-      { id: 'tt-2', module_id: 'mod-2', day: 'Monday', start_time: '14:00', end_time: '16:00', location: 'Lecture Hall 1' },
-      { id: 'tt-3', module_id: 'mod-3', day: 'Tuesday', start_time: '10:00', end_time: '12:00', location: 'Hall 4' },
-      { id: 'tt-4', module_id: 'mod-4', day: 'Wednesday', start_time: '09:00', end_time: '11:00', location: 'Online Teams' },
-      { id: 'tt-5', module_id: 'mod-1', day: 'Thursday', start_time: '08:00', end_time: '10:00', location: 'Lab 3B' },
-      { id: 'tt-6', module_id: 'mod-3', day: 'Thursday', start_time: '14:00', end_time: '15:00', location: 'Hall 4' },
-      { id: 'tt-7', module_id: 'mod-2', day: 'Friday', start_time: '11:00', end_time: '13:00', location: 'Hall 1' }
-    ];
-
-    const DEFAULT_TASKS = [
-      { id: 'tsk-1', module_id: 'mod-1', title: 'Implement Binary Tree Node structure', date: getTodayDateString(), start_time: '19:00', end_time: '20:30', priority: 'High', completed: true },
-      { id: 'tsk-2', module_id: 'mod-2', title: 'Mathematics revision exercises 4.1 & 4.2', date: getTodayDateString(), start_time: '10:30', end_time: '11:30', priority: 'High', completed: true },
-      { id: 'tsk-3', module_id: 'mod-3', title: 'Review lecture slides on CPU Cache hierarchy', date: getTodayDateString(), start_time: '16:00', end_time: '17:00', priority: 'Medium', completed: false },
-      { id: 'tsk-4', module_id: 'mod-4', title: 'Proofread academic essay bibliography', date: getTodayDateString(), start_time: '21:00', end_time: '21:30', priority: 'Low', completed: false }
-    ];
-
-    const DEFAULT_STUDY_SESSIONS = [
-      { id: 'ss-1', module_id: 'mod-1', date: getTodayDateString(), start_time: '19:00', end_time: '20:00', duration: 60, completed: false },
-      { id: 'ss-2', module_id: 'mod-2', date: getTodayDateString(), start_time: '10:30', end_time: '11:30', duration: 60, completed: true },
-      { id: 'ss-3', module_id: 'mod-2', date: getOffsetDateString(1), start_time: '18:00', end_time: '19:30', duration: 90, completed: false },
-      { id: 'ss-4', module_id: 'mod-1', date: getOffsetDateString(2), start_time: '19:00', end_time: '20:00', duration: 60, completed: false }
-    ];
-
-    const DEFAULT_SLEEP_RECORDS = [
-      { id: 'slp-1', date: getOffsetDateString(-1), bedtime: '23:00', wake_time: '06:30', duration: 7.5 },
-      { id: 'slp-2', date: getOffsetDateString(-2), bedtime: '23:15', wake_time: '06:45', duration: 7.5 },
-      { id: 'slp-3', date: getOffsetDateString(-3), bedtime: '22:45', wake_time: '06:15', duration: 7.5 },
-      { id: 'slp-4', date: getOffsetDateString(-4), bedtime: '00:00', wake_time: '07:00', duration: 7.0 },
-      { id: 'slp-5', date: getOffsetDateString(-5), bedtime: '22:30', wake_time: '06:30', duration: 8.0 }
-    ];
-
     window.StudyFlow = {
       currentUser: null,
-      isDemoUser: true,
       modules: [],
       assessments: [],
       timetable: [],
@@ -344,28 +216,18 @@
       }
 
       const registeredAccount = getRegisteredAccount();
-      if (registeredAccount && email !== DEFAULT_USER_PROFILE.email) {
-        if (registeredAccount.email !== email || registeredAccount.password !== pass) {
-          showToast("The email or password is incorrect.", "error");
-          return;
-        }
-        window.StudyFlow.isDemoUser = false;
-        window.StudyFlow.currentUser = registeredAccount.profile;
-        restoreRegisteredUserData(registeredAccount);
-        showToast("Welcome back, " + registeredAccount.profile.name + "!", "success");
-        completeAuthTransition(email, registeredAccount.profile.name);
+      const normalizedEmail = email.toLowerCase();
+      if (!registeredAccount ||
+        registeredAccount.email.toLowerCase() !== normalizedEmail ||
+        registeredAccount.password !== pass) {
+        showToast("The email or password is incorrect.", "error");
         return;
       }
 
-      window.StudyFlow.isDemoUser = true;
-      showToast("Logging into StudyFlow...", "success");
-      completeAuthTransition(email);
-    };
-
-    window.loginDemoUser = function() {
-      window.StudyFlow.isDemoUser = true;
-      showToast("Signed in as Khutso Modise (Demo Student)", "success");
-      completeAuthTransition('khutso@university.ac.za', 'Khutso Modise');
+      window.StudyFlow.currentUser = registeredAccount.profile;
+      restoreRegisteredUserData(registeredAccount);
+      showToast("Welcome back, " + registeredAccount.profile.name + "!", "success");
+      completeAuthTransition(normalizedEmail, registeredAccount.profile.name);
     };
 
     window.handleSignup = function(e) {
@@ -390,8 +252,7 @@
 
       const registeredAccount = getRegisteredAccount();
       const normalizedEmail = email.toLowerCase();
-      if (normalizedEmail === DEFAULT_USER_PROFILE.email.toLowerCase() ||
-        (registeredAccount && registeredAccount.email.toLowerCase() === normalizedEmail)) {
+      if (registeredAccount && registeredAccount.email.toLowerCase() === normalizedEmail) {
         showToast("This email is already registered. Please use a different email address.", "error");
         return;
       }
@@ -401,7 +262,6 @@
         return;
       }
 
-      window.StudyFlow.isDemoUser = false;
       window.StudyFlow.currentUser = {
         id: 'usr-' + Date.now(),
         name, email: normalizedEmail, university: uni, course, year_of_study: year,
@@ -420,19 +280,16 @@
         subtitle: "Account Recovery",
         bodyHtml: `
           <p class="text-sm text-slate-600 dark:text-slate-400 mb-3">Enter your student institution email to receive a password reset link.</p>
-          <input type="email" class="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none" value="khutso@university.ac.za">
+          <input type="email" class="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none" placeholder="student@university.ac.za">
         `,
         confirmText: "Send Reset Link",
         onConfirm: () => showToast("Password reset link sent to your student email.")
       });
     };
 
-    window.completeAuthTransition = function(email, name = 'Khutso Modise') {
+    window.completeAuthTransition = function(email, name = '') {
       document.getElementById('auth-view').classList.add('hidden');
       document.getElementById('app-view').classList.remove('hidden');
-      if (window.StudyFlow.isDemoUser) {
-        seedMemoryDefaults();
-      }
       updateUserUI();
       renderAllViews();
       navigate('dashboard');
@@ -454,17 +311,6 @@
       });
     };
 
-    function seedMemoryDefaults() {
-      window.StudyFlow.isDemoUser = true;
-      window.StudyFlow.currentUser = { ...DEFAULT_USER_PROFILE };
-      window.StudyFlow.modules = JSON.parse(JSON.stringify(DEFAULT_MODULES));
-      window.StudyFlow.assessments = JSON.parse(JSON.stringify(DEFAULT_ASSESSMENTS));
-      window.StudyFlow.timetable = JSON.parse(JSON.stringify(DEFAULT_TIMETABLE));
-      window.StudyFlow.tasks = JSON.parse(JSON.stringify(DEFAULT_TASKS));
-      window.StudyFlow.studySessions = JSON.parse(JSON.stringify(DEFAULT_STUDY_SESSIONS));
-      window.StudyFlow.sleepRecords = JSON.parse(JSON.stringify(DEFAULT_SLEEP_RECORDS));
-    }
-
     function initializeNewUserData() {
       window.StudyFlow.modules = [];
       window.StudyFlow.assessments = [];
@@ -479,7 +325,14 @@
       if (!storedAccount) return null;
 
       try {
-        return JSON.parse(storedAccount);
+        const account = JSON.parse(storedAccount);
+        if (!account || !account.email || !account.password || !account.profile ||
+          account.profile.id === 'khutso-modise' ||
+          account.email.toLowerCase() === 'khutso@university.ac.za') {
+          safeStorage.removeItem(REGISTERED_ACCOUNT_KEY);
+          return null;
+        }
+        return account;
       } catch (error) {
         safeStorage.removeItem(REGISTERED_ACCOUNT_KEY);
         return null;
@@ -510,7 +363,7 @@
 
     function persistCurrentUserData() {
       const account = getRegisteredAccount();
-      if (!window.StudyFlow.isDemoUser && account && window.StudyFlow.currentUser) {
+      if (account && window.StudyFlow.currentUser) {
         saveRegisteredAccount(account.password);
       }
     }
@@ -640,7 +493,8 @@
     }
 
     function updateUserUI() {
-      const user = window.StudyFlow.currentUser || DEFAULT_USER_PROFILE;
+      const user = window.StudyFlow.currentUser;
+      if (!user) return;
       document.getElementById('dash-greeting').textContent = `Good day, ${user.name.split(' ')[0]} 👋`;
       document.getElementById('user-sidebar-name').textContent = user.name;
       document.getElementById('user-sidebar-course').textContent = user.course;
@@ -1938,7 +1792,8 @@
 
     window.saveSettings = function(e) {
       e.preventDefault();
-      const user = window.StudyFlow.currentUser || DEFAULT_USER_PROFILE;
+      const user = window.StudyFlow.currentUser;
+      if (!user) return;
       user.name = document.getElementById('set-name').value.trim() || user.name;
       user.university = document.getElementById('set-uni').value.trim() || user.university;
       user.course = document.getElementById('set-course').value.trim() || user.course;
@@ -1950,21 +1805,6 @@
       showToast("Student settings and preferences saved.");
       updateUserUI();
       renderAllViews();
-    };
-
-    window.loadSampleKhutsoData = function() {
-      openModal({
-        title: "Load Khutso Demo Data?",
-        subtitle: "Sample Dataset Reload",
-        bodyHtml: "This will restore the complete realistic dataset for Khutso.",
-        confirmText: "Load Demo Data",
-        onConfirm: () => {
-          seedMemoryDefaults();
-          showToast("Khutso's demo data restored.");
-          updateUserUI();
-          renderAllViews();
-        }
-      });
     };
 
     window.confirmClearUserData = function() {
@@ -2000,8 +1840,8 @@
     }
 
     window.addEventListener('DOMContentLoaded', () => {
-      seedMemoryDefaults();
-      updateUserUI();
-      renderAllViews();
-      startAssessmentReminderService();
+      const registeredAccount = getRegisteredAccount();
+      if (registeredAccount && registeredAccount.email) {
+        document.getElementById('login-email').value = registeredAccount.email;
+      }
     });
