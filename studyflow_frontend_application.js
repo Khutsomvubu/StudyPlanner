@@ -36,7 +36,9 @@
 
     const REGISTERED_ACCOUNT_KEY = 'sf_registered_account';
     const ASSESSMENT_REMINDER_KEY = 'sf_assessment_reminders';
+    const TASK_REMINDER_KEY = 'sf_task_reminders';
     let assessmentReminderTimer = null;
+    let taskReminderTimer = null;
 
     /* =========================================================================
        DEMO STUDENT PROFILE (KHUTSO MODISE)
@@ -545,10 +547,15 @@
       if (assessmentReminderTimer) {
         window.clearInterval(assessmentReminderTimer);
       }
+      if (taskReminderTimer) {
+        window.clearInterval(taskReminderTimer);
+      }
 
       requestAssessmentNotificationPermission();
       checkForAssessmentReminders();
+      checkForTaskReminders();
       assessmentReminderTimer = window.setInterval(checkForAssessmentReminders, 60 * 1000);
+      taskReminderTimer = window.setInterval(checkForTaskReminders, 60 * 1000);
     }
 
     function requestAssessmentNotificationPermission() {
@@ -586,6 +593,49 @@
 
       if (remindersChanged) {
         safeStorage.setItem(ASSESSMENT_REMINDER_KEY, JSON.stringify(sentReminders));
+      }
+    }
+
+    function getSentTaskReminders() {
+      const storedReminders = safeStorage.getItem(TASK_REMINDER_KEY);
+      if (!storedReminders) return {};
+
+      try {
+        return JSON.parse(storedReminders);
+      } catch (error) {
+        safeStorage.removeItem(TASK_REMINDER_KEY);
+        return {};
+      }
+    }
+
+    function checkForTaskReminders() {
+      if (!('Notification' in window) || Notification.permission !== 'granted') return;
+
+      const now = new Date();
+      const reminderWindowStart = new Date(now.getTime() - 15 * 60 * 1000);
+      const sentReminders = getSentTaskReminders();
+      let remindersChanged = false;
+
+      window.StudyFlow.tasks
+        .filter(task => !task.completed && task.date && task.start_time)
+        .forEach(task => {
+          const taskDate = new Date(`${task.date}T${task.start_time}:00`);
+          if (Number.isNaN(taskDate.getTime()) || taskDate < reminderWindowStart || taskDate > now) return;
+
+          const reminderId = `${task.id}:${taskDate.toISOString()}`;
+          if (sentReminders[reminderId]) return;
+
+          const module = window.StudyFlow.modules.find(item => item.id === task.module_id);
+          new Notification(`Task reminder: ${task.title}`, {
+            body: `${module ? module.name + ' • ' : ''}Your task was scheduled for ${task.start_time}.`,
+            tag: reminderId
+          });
+          sentReminders[reminderId] = true;
+          remindersChanged = true;
+        });
+
+      if (remindersChanged) {
+        safeStorage.setItem(TASK_REMINDER_KEY, JSON.stringify(sentReminders));
       }
     }
 
@@ -1602,6 +1652,16 @@
                 </select>
               </div>
             </div>
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block font-semibold mb-1">Start Time</label>
+                <input type="time" id="tsk-start-time" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none">
+              </div>
+              <div>
+                <label class="block font-semibold mb-1">End Time</label>
+                <input type="time" id="tsk-end-time" required class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none">
+              </div>
+            </div>
           </div>
         `,
         confirmText: "Save Task",
@@ -1612,12 +1672,21 @@
             return;
           }
 
+          const startTime = document.getElementById('tsk-start-time').value;
+          const endTime = document.getElementById('tsk-end-time').value;
+          if (!startTime || !endTime || endTime <= startTime) {
+            showToast("Please enter a valid start and end time.", "error");
+            return;
+          }
+
           window.StudyFlow.tasks.push({
             id: 'tsk-' + Date.now(),
             title,
             module_id: document.getElementById('tsk-module').value || null,
             priority: document.getElementById('tsk-prio').value,
             date: getTodayDateString(),
+            start_time: startTime,
+            end_time: endTime,
             completed: false
           });
 
@@ -1934,4 +2003,5 @@
       seedMemoryDefaults();
       updateUserUI();
       renderAllViews();
+      startAssessmentReminderService();
     });
